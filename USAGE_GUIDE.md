@@ -151,19 +151,20 @@ The report provides:
 - **Context Precision**: Signal-to-noise ratio in retrieval.
 - **Critique**: Feedback for samples with low scores.
 
-For production environments, use the provided Helm chart located in `charts/rag-system`.
+---
 
-### Deployment Steps
-1. **Configure Values**: Edit `charts/rag-system/values.yaml` with your production settings (API keys, DB host, etc.).
-2. **Install**:
-   ```bash
-   helm install rag-prod ./charts/rag-system -f my-values.yaml
-   ```
+## 9. API Testing (Postman)
 
-### High-Availability Features
-- **Auto-scaling**: The chart includes HPAs that scale the API and Worker pods based on CPU utilization.
-- **Ingress**: Configured for `nginx` ingress controller with automated SSL via `cert-manager`.
-- **Resource Management**: Default limits ensure high-throughput stability (1M+ queries/day).
+A pre-configured Postman collection is available at `rag_api_postman_collection.json`.
+
+### How to use:
+1. **Import**: Open Postman and import the JSON file.
+2. **Variables**: Update the **Collection Variables** (Base URL, Tokens, Admin Credentials) to match your environment.
+3. **Run**: Use the organized folders (Administration, Ingestion, Chat, etc.) to test the full system lifecycle.
+
+---
+
+## 10. Troubleshooting
 
 - **Check Logs**:
   ```bash
