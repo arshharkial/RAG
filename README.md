@@ -26,9 +26,9 @@ docker-compose up -d
 Access the API at `http://localhost/api/v1/docs` (via Traefik).
 
 ## 📅 Timeline
-- **Phase 1: Foundation (Current)**: Architecture design and documentation.
-- **Phase 2: Core API**: FastAPI setup, Auth, and Multi-tenancy logic.
-- **Phase 3: Ingestion**: Async workers for Text/Audio/Image/Video.
-- **Phase 4: Retrieval**: Vector store integration, Reranking, and Semantic Cache.
-- **Phase 5: Compliance**: PII scrubbing, audit logging, and SOC2 workflows.
-- **Phase 6: Production**: K8s deployment, CI/CD, and Monitoring.
+- [x] **Phase 1: Foundation**: Architecture design and documentation.
+- [x] **Phase 2: Core API**: FastAPI setup, Auth, and Multi-tenancy logic.
+- [x] **Phase 3: Ingestion**: Async workers for Text/Audio/Image/Video.
+- [x] **Phase 4: Retrieval**: Vector store integration, Reranking, and Semantic Cache.
+- [x] **Phase 5: Compliance**: PII scrubbing, audit logging, and SOC2 workflows.
+- [x] **Phase 6: Finalization**: Complete system integration and documentation.

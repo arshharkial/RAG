@@ -1,57 +1,49 @@
 # Technical Documentation - Multi-Modal RAG
 
-Welcome to the internal documentation for the Multi-Modal RAG system.
+## 1. Overview
+A production-grade RAG system for multi-modal context retrieval.
 
-## 1. Project Overview
-This system is designed to provide ultra-low latency context retrieval for varied media types, supporting a multi-tenant production environment.
+## 2. API Endpoints
 
-## 2. Architecture Deep-Dive
+### Ingestion
+- `POST /api/v1/ingest/upload`: Upload media (Text, Audio, Image, Video).
+  - **Headers**: `X-Tenant-ID` (Required)
+  - **Form Data**: `file`, `media_type`
 
-### Data Ingestion
-All data enters via the `/ingest` endpoints. Depending on the `Content-Type`, the FastAPI gateway routes the file to a temporary S3/Minio bucket and triggers a Celery task.
-- **Text**: Semantically chunked into 500-1000 tokens.
-- **Audio**: Transcribed via Whisper, with overlapping window segments.
-- **Image**: Embedded via CLIP ViT-L/14 for visual search.
-- **Video**: Sampled at 1 frame every 2 seconds. Audio and visual vectors are merged or stored separately with temporal metadata.
+### Query
+- `GET /api/v1/query/chat`: Stream a RAG response.
+  - **Headers**: `X-Tenant-ID` (Required)
+  - **Params**: `query`, `stream` (bool)
+  - **Response**: NDJSON stream containing `content`, `references`, and `source_material`.
 
-### Retrieval Loop
-1. **Query Input**: User sends a natural language query.
-2. **Semantic Cache**: Redis is checked for high-similarity hits (>0.98 cosine similarity).
-3. **Recall Stage**: Qdrant performs a search using HNSW, filtered by `tenant_id`.
-4. **Precision Stage**: Top 100 results are re-ranked using a Cross-Encoder.
-5. **Generation**: Top context is sent to the hotswapped LLM (GPT-4/Claude) for a streaming response.
-6. **Citation Post-processing**: The system maps LLM citations (e.g., `[1]`) back to retrieval metadata to ensure accuracy.
+## 3. Internal Services
 
-### API Response Structure
-```json
-{
-  "answer": "The policy covers... [1].",
-  "references": [
-    {
-      "index": 1,
-      "text": "Full text of the retrieved chunk...",
-      "metadata": { "document_name": "policy.pdf", "page": 12 }
-    }
-  ],
-  "source_material": [
-    {
-      "name": "Full Policy 2024",
-      "url": "https://s3.bucket/path/to/source.pdf"
-    }
-  ]
-}
-```
+### RAG Orchestrator
+Coordinates the following flow:
+1. Hash query for **Semantic Cache**.
+2. Log action to **Audit Logger**.
+3. Generate **Embeddings** via factory.
+4. Search **Vector Store** (Filtered by Tenant).
+5. Pass hits to **Reranker**.
+6. Stream through **LLM Provider**.
+7. Run **Evaluation Toggle** (Redis-based shadow logging).
 
-## 3. Multi-tenancy
-We use **logical isolation** via metadata filters.
-- **Enforcement**: Middleware attaches `tenant_id` to the request context.
-- **Safety**: The Vector DB query constructor *forces* a filter on `tenant_id`.
+### Ingestion Worker
+Handles:
+1. File persistence to `storage/`.
+2. **PII Scrubbing** on text data.
+3. **Media extraction** (Whisper for audio, CLIP for images).
+4. **Indexing** to Qdrant.
 
-## 4. Compliance & Security
-- **PII Scrubbing**: Applied at the ingestion worker level BEFORE data hits the vector store.
-- **Encryption**: Secrets are managed via Vault/KMS; data volumes are encrypted at rest.
+## 4. Configuration
+Managed via `.env` and `src/core/config.py`.
+- `LLM_PROVIDER`: `openai`, `anthropic`, or `mock`.
+- `EMBEDDING_PROVIDER`: `openai` or `mock`.
+- `REDIS_URL`: Connection string for cache and celery.
 
-## 5. Developer Guide
-- **Running tests**: `pytest` for unit/integration tests.
-- **Adding a new LLM**: Inherit from `BaseLLM` and register in `LLMFactory`.
-- **Infrastructure logs**: Viewable via Traefik Dashboard and Kibana.
+## 5. Feature Flags
+- `eval:{tenant_id}`: Set to `true` in Redis to enable shadow accuracy evaluation logging.
+
+## 6. Development
+- **Local Setup**: `docker-compose up --build`
+- **Tests**: `pytest tests/`

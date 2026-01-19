@@ -15,32 +15,36 @@ Tracking the implementation progress of the Multi-Modal RAG system.
 - [x] Initialize Documentation & Git
 
 ### Phase 2: Core Infrastructure
-- [ ] Initialize FastAPI project structure
-- [ ] Configure Traefik API Gateway
-- [ ] Set up PostgreSQL (SQLAlchemy/Alembic)
-- [ ] Set up Redis & Celery
-- [ ] Set up Qdrant Vector Store
+- [x] Initialize FastAPI project structure
+- [x] Configure Traefik API Gateway
+- [x] Set up PostgreSQL (SQLAlchemy/Alembic)
+- [x] Set up Redis & Celery
+- [x] Set up Qdrant Vector Store
 
 ### Phase 3: Hotswappable Layer
-- [ ] Abstract BaseLLM & Provider Factory
-- [ ] Abstract BaseEmbedder & Provider Factory
-- [ ] Environment-based provider switching
+- [x] Abstract BaseLLM & Provider Factory
+- [x] Abstract BaseEmbedder & Provider Factory
+- [x] Environment-based provider switching
+- [x] Mock Provider Implementations for Testing
 
 ### Phase 4: Multi-modal Ingestion
-- [ ] Text extraction and chunking
-- [ ] Image processing (CLIP)
-- [ ] Audio transcription (Whisper)
-- [ ] Video frame extraction & ASR
+- [x] Text extraction and semantic chunking
+- [x] Image processing (CLIP) logic
+- [x] Audio transcription (Whisper) logic
+- [x] Video frame extraction & ASR logic
+- [x] Multi-tenant Storage Service
 
 ### Phase 5: Retrieval & RAG
-- [ ] Vector search with tenant filtering
-- [ ] Semantic Reranking integration
-- [ ] Citations & Source Material Attribution
-- [ ] Semantic Caching (Redis)
-- [ ] Streaming response handler
+- [x] Vector search with tenant filtering
+- [x] Semantic Reranking integration
+- [x] Citations & Source Material Attribution
+- [x] Semantic Caching (Redis)
+- [x] Streaming response handler
+- [x] RAG Orchestrator
 
 ### Phase 6: Production & Compliance
-- [ ] PII Scrubbing middleware
-- [ ] Audit logging system
-- [ ] Accuracy Evaluation toggle
-- [ ] Monitoring & Tracing (Prometheus/Grafana)
+- [x] PII Scrubbing middleware (Presidio)
+- [x] Immutable Audit logging system
+- [x] Togglable Accuracy Evaluation (Redis Flags)
+- [x] Monitoring & Tracing configuration
+- [x] Dockerization & Traefik Setup
