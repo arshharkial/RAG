@@ -23,6 +23,15 @@ celery_app.conf.update(
 # Autodiscover tasks in src.worker.tasks
 celery_app.autodiscover_tasks(["src.worker"])
 
-@celery_app.task(name="health_check_task")
-def health_check_task():
-    return {"status": "ok", "message": "Celery worker is healthy"}
+@celery_app.task(name="run_evaluation_task")
+def run_evaluation_task(tenant_id: str):
+    """Async wrapper for the evaluation service."""
+    import asyncio
+    from src.services.evaluation import evaluation_service
+    
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        # This shouldn't happen in a fresh celery process but just in case
+        return loop.create_task(evaluation_service.run_evaluation(tenant_id))
+    else:
+        return asyncio.run(evaluation_service.run_evaluation(tenant_id))

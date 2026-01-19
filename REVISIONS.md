@@ -16,3 +16,4 @@ All significant updates to the system architecture and implementation are tracke
 | 2026-01-19 | V1.9 | Implemented Admin onboarding endpoints with HTTP Basic Auth. | Antigravity |
 | 2026-01-19 | V1.10 | Optimized for high-throughput scaling (1M+ queries/ingestions per day). | Antigravity |
 | 2026-01-19 | V1.11 | Generated production Helm chart for Kubernetes deployment. | Antigravity |
+| 2026-01-19 | V1.12 | Implemented RAG Evaluation Engine with G-Eval scoring and Markdown reports. | Antigravity |

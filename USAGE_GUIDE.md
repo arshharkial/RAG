@@ -122,7 +122,34 @@ The system is optimized to handle 1M+ queries and 1M+ ingestions per day.
 
 ---
 
-## 7. Kubernetes Deployment (Helm)
+## 8. RAG Evaluation System
+
+The system provides an automated way to measure the quality of the RAG pipeline.
+
+### Step 1: Enable Shadow Tracking
+Enable evaluation logging for a tenant via Redis:
+```bash
+redis-cli SET eval:tenant-1 true
+```
+Every query will now log a (Context, Query, Answer) triplet to the `audit_logs` table.
+
+### Step 2: Trigger Evaluation Run
+Run a background job to score the collected samples using G-Eval:
+**Endpoint**: `POST /api/v1/eval/run`  
+**Example (cURL)**:
+```bash
+curl -X POST "http://localhost/api/v1/eval/run" \
+     -H "X-Tenant-ID: tenant-1" \
+     -H "Authorization: Bearer my-admin-token"
+```
+
+### Step 3: View Quality Report
+**Endpoint**: `GET /api/v1/eval/reports`  
+The report provides:
+- **Faithfulness**: How much the answer is grounded in context.
+- **Answer Relevance**: How well the answer matches the query.
+- **Context Precision**: Signal-to-noise ratio in retrieval.
+- **Critique**: Feedback for samples with low scores.
 
 For production environments, use the provided Helm chart located in `charts/rag-system`.
 
