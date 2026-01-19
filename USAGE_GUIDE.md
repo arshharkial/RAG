@@ -24,12 +24,24 @@ The API Gateway (Traefik) will be accessible at `http://localhost`.
 
 ## 2. Authentication & Multi-tenancy
 
-The system uses a **Mandatory Multi-tenancy** model. Every request to the API must include the following headers:
+The system uses a **Mandatory Multi-tenancy** model secured via **JWT Bearer Tokens**.
 
-- `X-Tenant-ID`: A unique identifier for your organization/tenant (e.g., `tenant-123`).
-- `Authorization`: A Bearer token (e.g., `Bearer your-token`). 
-  > [!NOTE]
-  > In the current implementation, the Gateway delegates validation to the `/api/v1/auth/verify` endpoint. Ensure these headers are present to pass the ForwardAuth check.
+### How to get a Bearer Token
+To interact with the API, you must first generate a token for your tenant.
+
+**Endpoint**: `POST /api/v1/auth/token`  
+**Example (cURL)**:
+```bash
+curl -X POST "http://localhost/api/v1/auth/token" \
+     -H "Content-Type: application/json" \
+     -d '{"tenant_id": "tenant-1", "client_secret": "your-secret-key"}'
+```
+*Note: The `client_secret` corresponds to the `SECRET_KEY` defined in your `.env` file.*
+
+### Using the Token
+Include the token in all subsequent requests:
+- `X-Tenant-ID`: The unique identifier for your tenant (must match the token's subject).
+- `Authorization`: `Bearer <your_token>`
 
 ---
 
