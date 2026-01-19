@@ -21,6 +21,12 @@ A production-grade RAG system for multi-modal context retrieval.
 - `GET /api/v1/conversations/{id}/history`: Get the full message history for a conversation.
 - `DELETE /api/v1/conversations/{id}`: Delete a conversation and its messages.
 
+### Administration
+- `POST /api/v1/admin/tenants`: Onboard a new tenant.
+- `GET /api/v1/admin/tenants`: List all onboarded tenants.
+- `DELETE /api/v1/admin/tenants/{id}`: Offboard a tenant.
+- **Auth**: HTTP Basic (Predefined admin credentials).
+
 ### Security (API Gateway)
 - **ForwardAuth**: `GET /api/v1/auth/verify`. Traefik delegates auth to this endpoint.
 - **SSL**: Traffic is accepted on port 80 (redirects to 443) and port 443 (HTTPS).

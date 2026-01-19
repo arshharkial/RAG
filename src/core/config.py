@@ -1,7 +1,12 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+from typing import Optional
 
 class Settings(BaseSettings):
+    # Admin Credentials
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "supersecretadminpassword"
+
     # Database
     DB_USER: str = "postgres"
     DB_PASSWORD: str = "postgres"

@@ -33,7 +33,28 @@ The system uses a **Mandatory Multi-tenancy** model. Every request to the API mu
 
 ---
 
-## 3. Core Workflows
+## 3. Administration & Onboarding
+
+Before a tenant can use the system, they must be onboarded by an administrator.
+
+### Admin Authentication
+The admin endpoints are secured via **HTTP Basic Auth** using predefined credentials in the `.env` file:
+- `ADMIN_USERNAME`: Default is `admin`
+- `ADMIN_PASSWORD`: Default is `supersecretadminpassword`
+
+### Onboarding a Tenant
+**Endpoint**: `POST /api/v1/admin/tenants`  
+**Example (cURL)**:
+```bash
+curl -X POST "http://localhost/api/v1/admin/tenants" \
+     -u "admin:supersecretadminpassword" \
+     -H "Content-Type: application/json" \
+     -d '{"id": "tenant-1", "name": "Acme Corp"}'
+```
+
+---
+
+## 4. Core Workflows
 
 ### A. Ingesting Data
 You can upload Text, Audio, Image, or Video files. The system processes these asynchronously.
