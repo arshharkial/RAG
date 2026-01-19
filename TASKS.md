@@ -35,6 +35,7 @@ Tracking the implementation progress of the Multi-Modal RAG system.
 ### Phase 5: Retrieval & RAG
 - [ ] Vector search with tenant filtering
 - [ ] Semantic Reranking integration
+- [ ] Citations & Source Material Attribution
 - [ ] Semantic Caching (Redis)
 - [ ] Streaming response handler
 

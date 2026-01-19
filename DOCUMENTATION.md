@@ -20,6 +20,27 @@ All data enters via the `/ingest` endpoints. Depending on the `Content-Type`, th
 3. **Recall Stage**: Qdrant performs a search using HNSW, filtered by `tenant_id`.
 4. **Precision Stage**: Top 100 results are re-ranked using a Cross-Encoder.
 5. **Generation**: Top context is sent to the hotswapped LLM (GPT-4/Claude) for a streaming response.
+6. **Citation Post-processing**: The system maps LLM citations (e.g., `[1]`) back to retrieval metadata to ensure accuracy.
+
+### API Response Structure
+```json
+{
+  "answer": "The policy covers... [1].",
+  "references": [
+    {
+      "index": 1,
+      "text": "Full text of the retrieved chunk...",
+      "metadata": { "document_name": "policy.pdf", "page": 12 }
+    }
+  ],
+  "source_material": [
+    {
+      "name": "Full Policy 2024",
+      "url": "https://s3.bucket/path/to/source.pdf"
+    }
+  ]
+}
+```
 
 ## 3. Multi-tenancy
 We use **logical isolation** via metadata filters.

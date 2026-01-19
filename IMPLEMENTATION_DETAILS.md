@@ -50,6 +50,7 @@ graph TD
 - **Ultra-Low Latency**: Semantic caching, connection pooling, and HNSW optimization.
 - **Multi-tenancy**: Strict metadata-level isolation.
 - **Advanced RAG**: Semantic Reranking (2-stage), Parent-Document Retrieval, and HyDE.
+- **Citations & Transparency**: API returns generated answers with inline citations, a list of referenced chunks, and original source material links.
 - **Togglable Evaluation**: Redis-managed accuracy evaluation (Shadow logging, RAGAS scoring).
 
 ## 4. Compliance (SOC2 & GDPR)
