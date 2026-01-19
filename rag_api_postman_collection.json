@@ -1,0 +1,207 @@
+{
+	"info": {
+		"_postman_id": "rag-collection-id-123",
+		"name": "Multi-Modal RAG API",
+		"description": "Postman collection for the production-grade Multi-Modal RAG system.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Administration",
+			"item": [
+				{
+					"name": "Onboard Tenant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{ "key": "password", "value": "{{admin_password}}", "type": "string" },
+								{ "key": "username", "value": "{{admin_username}}", "type": "string" }
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"tenant-1\",\n    \"name\": \"Acme Corporation\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/tenants",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "tenants"]
+						}
+					}
+				},
+				{
+					"name": "List Tenants",
+					"request": {
+						"method": "GET",
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{ "key": "password", "value": "{{admin_password}}", "type": "string" },
+								{ "key": "username", "value": "{{admin_username}}", "type": "string" }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/tenants",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "tenants"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Ingestion",
+			"item": [
+				{
+					"name": "Upload Media",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-Tenant-ID", "value": "tenant-1" },
+							{ "key": "Authorization", "value": "Bearer {{user_token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "file", "type": "file", "src": "" },
+								{ "key": "media_type", "value": "text", "type": "text" }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ingest/upload",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ingest", "upload"]
+						}
+					}
+				},
+				{
+					"name": "Check Job Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-Tenant-ID", "value": "tenant-1" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ingest/status/:job_id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ingest", "status", ":job_id"],
+							"variable": [
+								{ "key": "job_id", "value": "job-123" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Retrieval & Chat",
+			"item": [
+				{
+					"name": "Conversational RAG Query",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-Tenant-ID", "value": "tenant-1" },
+							{ "key": "Authorization", "value": "Bearer {{user_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/query/chat?query=What is the main topic?&conversation_id=conv-001&stream=true",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "query", "chat"],
+							"query": [
+								{ "key": "query", "value": "What is the main topic?" },
+								{ "key": "conversation_id", "value": "conv-001" },
+								{ "key": "stream", "value": "true" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Conversations",
+			"item": [
+				{
+					"name": "List Conversations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-Tenant-ID", "value": "tenant-1" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/conversations/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "conversations", ""]
+						}
+					}
+				},
+				{
+					"name": "Get History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-Tenant-ID", "value": "tenant-1" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/conversations/:id/history",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "conversations", ":id", "history"],
+							"variable": [
+								{ "key": "id", "value": "conv-001" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Evaluation",
+			"item": [
+				{
+					"name": "Trigger Evaluation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "X-Tenant-ID", "value": "tenant-1" },
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/eval/run",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "eval", "run"]
+						}
+					}
+				},
+				{
+					"name": "List Reports",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "X-Tenant-ID", "value": "tenant-1" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/eval/reports",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "eval", "reports"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost", "type": "string" },
+		{ "key": "admin_username", "value": "admin", "type": "string" },
+		{ "key": "admin_password", "value": "supersecretadminpassword", "type": "string" },
+		{ "key": "user_token", "value": "your-jwt-here", "type": "string" },
+		{ "key": "admin_token", "value": "your-admin-jwt-here", "type": "string" }
+	]
+}
