@@ -38,6 +38,7 @@ class LLMFactory:
 | **Citations & Sources** | Response includes inline citations and material links. | ✅ |
 | **Compliance** | PII Scrubbing (Presidio) and Immutable Audit Logs. | ✅ |
 | **Evaluation** | Togglable shadow evaluation via Redis feature flags. | ✅ |
+| **API Gateway** | Traefik with SSL (80/443), Rate Limiting, and ForwardAuth. | ✅ |
 
 ## 3. Key Files and Code Structure
 - **[main.py](file:///Users/arshharkial/Developer/Personal/RAG/src/main.py)**: API Entry point with health checks.

@@ -7,14 +7,19 @@ A production-grade RAG system for multi-modal context retrieval.
 
 ### Ingestion
 - `POST /api/v1/ingest/upload`: Upload media (Text, Audio, Image, Video).
-  - **Headers**: `X-Tenant-ID` (Required)
+  - **Headers**: `X-Tenant-ID` (Required), `Authorization` (Bearer token required)
   - **Form Data**: `file`, `media_type`
 
 ### Query
 - `GET /api/v1/query/chat`: Stream a RAG response.
-  - **Headers**: `X-Tenant-ID` (Required)
+  - **Headers**: `X-Tenant-ID` (Required), `Authorization` (Bearer token required)
   - **Params**: `query`, `stream` (bool)
   - **Response**: NDJSON stream containing `content`, `references`, and `source_material`.
+
+### Security (API Gateway)
+- **ForwardAuth**: `GET /api/v1/auth/verify`. Traefik delegates auth to this endpoint.
+- **SSL**: Traffic is accepted on port 80 (redirects to 443) and port 443 (HTTPS).
+- **Rate Limiting**: Enforced at the gateway level (100 req/s average).
 
 ## 3. Internal Services
 
