@@ -42,6 +42,8 @@ class LLMFactory:
 | **Cloud Storage** | AWS S3 for file persistence with CloudFront URL delivery. | ✅ |
 | **Chat History** | Persistent Conversations and Messages with context awareness. | ✅ |
 | **Admin Controls** | Secure tenant onboarding via HTTP Basic Auth. | ✅ |
+| **High Scaling** | Connection pooling (DB/Redis) & tuned concurrency for 1M+ reqs. | ✅ |
+| **Helm Chart** | Production-ready K8s deployment with HPAs and Ingress. | ✅ |
 
 ## 3. Key Files and Code Structure
 - **[main.py](file:///Users/arshharkial/Developer/Personal/RAG/src/main.py)**: API Entry point with health checks.

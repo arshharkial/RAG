@@ -39,23 +39,26 @@ graph TD
   - **Abstract Factory**: For Hotswappable LLMs and Embedders.
   - **Singleton**: For shared services like VectorStore and Cache.
   - **Middleware**: For Multi-tenancy enforcement and PII scrubbing.
-- **Database**: PostgreSQL (Metadata & Audit), Qdrant (Vectors).
-- **Messaging**: Redis + Celery.
+- **Database**: PostgreSQL (Metadata & Audit), Qdrant (Vectors), Redis (Cache & Queue).
+- **Storage**: Multi-provider (Local/AWS S3) with CloudFront distribution.
 
 ## 3. Core Features
-- **Multi-modal Ingestion**: Supports extraction from diverse media. Video is handled via `ffmpeg` keyframe extraction and audio segmenting.
-- **Hotswappable Providers**: Define any new provider by inheriting from `BaseLLM` or `BaseEmbedder`.
-- **Latency Optimization**: 
-  - **Semantic Cache**: Resolves frequent queries in O(1) time.
-  - **HNSW Filtering**: Tenant-ID filtering is done at the index level in Qdrant.
+- **Multi-modal Ingestion**: Supports extraction from diverse media via Whisper (Audio), CLIP (Images), and `ffmpeg` (Video).
+- **Conversational RAG**: 
+  - **Dialogue Context**: Retrieves last 10 messages from PostgreSQL to maintain chat state.
+  - **Auto-Persistence**: Saves every query/response with associated reference metadata.
+- **Hotswappable Providers**: Decoupled interfaces for LLMs and Embedders.
+- **High-Throughput Scaling**:
+  - **Async Pooling**: 50+ DB connections with overflow for high concurrency.
+  - **Worker Clusters**: Prefork worker pool with concurrency tuning for media tasks.
 - **Compliance**:
-  - **PII Masking**: Integrated into the ingestion worker to ensure no sensitive data is indexed.
-  - **Audit Trails**: Every retrieval and ingestion action is logged to `audit_logs` table.
+  - **PII Masking**: Presidio-based worker scrubbers.
+  - **Audit Trails**: Non-repudiable logs for every system action.
 
-## 4. Multi-tenancy Isolation
-- **Metadata Filtering**: Every vector has a mandatory `tenant_id` payload.
-- **Query Restriction**: The `VectorStore.search` method enforces a `must` match filter on `tenant_id`.
+## 4. Multi-tenancy & Administration
+- **Data Isolation**: Forced `tenant_id` filtering in Qdrant and PostgreSQL.
+- **Admin Module**: Secured via HTTP Basic Auth for tenant onboarding and lifecycle management.
 
-## 5. Deployment
-- **API Gateway**: Traefik handles SSL, Rate-Limiting, and Dynamic Routing.
-- **Docker**: Balanced compose setup for local dev, extendable to K8s.
+## 5. Deployment & Orchestration
+- **API Gateway**: Traefik with SSL (80/443 redirect), Rate Limiting, and ForwardAuth.
+- **Helm Chart**: Production Kubernetes deployment with HPAs (Horizontal Pod Autoscalers) and resource constraints.

@@ -30,36 +30,36 @@ A production-grade RAG system for multi-modal context retrieval.
 ### Security (API Gateway)
 - **ForwardAuth**: `GET /api/v1/auth/verify`. Traefik delegates auth to this endpoint.
 - **SSL**: Traffic is accepted on port 80 (redirects to 443) and port 443 (HTTPS).
-- **Rate Limiting**: Enforced at the gateway level (100 req/s average).
+- **Rate Limiting**: Enforced at the gateway level (500 req/s average, 1000 burst).
 
 ## 3. Internal Services
 
 ### RAG Orchestrator
 Coordinates the following flow:
-1. Hash query for **Semantic Cache**.
-2. Log action to **Audit Logger**.
-3. Generate **Embeddings** via factory.
-4. Search **Vector Store** (Filtered by Tenant).
-5. Pass hits to **Reranker**.
-6. Stream through **LLM Provider**.
-7. Run **Evaluation Toggle** (Redis-based shadow logging).
+1. Fetch 10 previous messages for **Context**.
+2. Hash query for **Semantic Cache**.
+3. Log action to **Audit Logger**.
+4. Generate **Embeddings** via factory.
+5. Search **Vector Store** (Filtered by Tenant).
+6. Pass hits to **Reranker**.
+7. Stream through **LLM Provider**.
+8. Save assistant response to **PostgreSQL**.
 
 ### Ingestion Worker
 Handles:
-1. File persistence to `storage/`.
-2. **PII Scrubbing** on text data.
-3. **Media extraction** (Whisper for audio, CLIP for images).
-4. **Indexing** to Qdrant.
+1. File persistence to **AWS S3** (or local `storage/`).
+2. **CloudFront** URL generation for retrievals.
+3. **PII Scrubbing** on text data.
+4. **Media extraction** (Whisper for audio, CLIP for images, ffmpeg for video).
+5. **Indexing** to Qdrant.
 
 ## 4. Configuration
 Managed via `.env` and `src/core/config.py`.
+- `STORAGE_TYPE`: `local` or `s3`.
+- `ADMIN_USERNAME`/`ADMIN_PASSWORD`: Predefined admin credentials.
 - `LLM_PROVIDER`: `openai`, `anthropic`, or `mock`.
-- `EMBEDDING_PROVIDER`: `openai` or `mock`.
-- `REDIS_URL`: Connection string for cache and celery.
 
-## 5. Feature Flags
-- `eval:{tenant_id}`: Set to `true` in Redis to enable shadow accuracy evaluation logging.
-
-## 6. Development
+## 5. Deployment
 - **Local Setup**: `docker-compose up --build`
-- **Tests**: `pytest tests/`
+- **Kubernetes**: `helm install rag ./charts/rag-system`
+- **Scaling**: HPAs enable horizontal pod autoscaling for API and Workers.
