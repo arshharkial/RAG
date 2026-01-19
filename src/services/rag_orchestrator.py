@@ -14,50 +14,88 @@ class RAGOrchestrator:
         self, 
         tenant_id: str, 
         query_text: str,
+        conversation_id: str,
+        db,  # AsyncSession
         stream: bool = True
     ) -> AsyncGenerator[Dict[str, Any], None]:
-        # 1. Generate query embedding
+        import uuid
+        from src.models.chat import Message, Conversation
+        from sqlalchemy import select
+
+        # 1. Fetch or initialize conversation context
+        history_msgs = []
+        stmt = select(Message).where(Message.conversation_id == conversation_id).order_by(Message.created_at.asc()).limit(10)
+        result = await db.execute(stmt)
+        history_msgs = result.scalars().all()
+
+        # 2. Save User Message
+        user_msg_id = str(uuid.uuid4())
+        user_msg = Message(
+            id=user_msg_id,
+            conversation_id=conversation_id,
+            role="user",
+            content=query_text
+        )
+        db.add(user_msg)
+        await db.commit()
+
+        # 3. Generate query embedding
         query_vector = await self.embedder.embed_text(query_text)
         query_hash = hashlib.sha256(query_text.encode()).hexdigest()
         
-        # 2. Audit Log - Query Start
+        # 4. Audit Log - Query Start
         from src.services.audit_logger import audit_logger
-        await audit_logger.log(tenant_id, action="retrieval_query", payload={"query": query_text})
+        await audit_logger.log(tenant_id, action="retrieval_query", payload={"query": query_text, "conversation_id": conversation_id})
 
-        # 3. Check semantic cache
+        # 5. Check semantic cache
         cached_response = await semantic_cache.get(tenant_id, query_hash)
         if cached_response:
             yield {"type": "cache_hit", "content": cached_response}
             return
 
-        # 4. Retrieve context
+        # 6. Retrieve context
         hits = await vector_store.search(tenant_id, query_vector, limit=20)
         
-        # 5. Rerank
+        # 7. Rerank
         documents = [hit["payload"] for hit in hits]
         reranked_docs = await reranker.rerank(query_text, documents, top_k=5)
         
-        # 6. Construct Context
+        # 8. Construct Context & Prompt
         context_str = self._format_context(reranked_docs)
         
-        # 7. Generate Response
+        # Inject Chat History into Prompt
+        history_str = "\n".join([f"{m.role}: {m.content}" for m in history_msgs])
+        
         system_prompt = (
             "You are a helpful assistant. Use the provided context to answer the query. "
             "Use inline citations in the format [1], [2], etc. "
-            "If the answer is not in the context, say you don't know."
+            "Maintain a conversational tone and acknowledge previous context if relevant."
         )
         
-        prompt = f"Context:\n{context_str}\n\nQuery: {query_text}"
+        prompt = f"Context Material:\n{context_str}\n\nRecent Chat History:\n{history_str}\n\nUser Query: {query_text}"
         
+        # 9. Generate Response
         full_answer = ""
         async for chunk in self.llm.generate_stream(prompt, system_prompt=system_prompt):
             full_answer += chunk
             yield {"type": "content", "chunk": chunk}
             
-        # 8. Shadow Evaluation (Togglable)
+        # 10. Save Assistant Message
+        assistant_msg_id = str(uuid.uuid4())
+        assistant_msg = Message(
+            id=assistant_msg_id,
+            conversation_id=conversation_id,
+            role="assistant",
+            content=full_answer,
+            metadata_json={"references": self._get_references(reranked_docs)}
+        )
+        db.add(assistant_msg)
+        await db.commit()
+
+        # 11. Shadow Evaluation (Togglable)
         await self._handle_evaluation(tenant_id, query_text, reranked_docs, full_answer)
 
-        # 9. Send References
+        # 12. Send References
         references = self._get_references(reranked_docs)
         yield {"type": "references", "content": references}
         

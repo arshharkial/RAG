@@ -11,10 +11,15 @@ A production-grade RAG system for multi-modal context retrieval.
   - **Form Data**: `file`, `media_type`
 
 ### Query
-- `GET /api/v1/query/chat`: Stream a RAG response.
+- `GET /api/v1/query/chat`: Stream a RAG response with conversational context.
   - **Headers**: `X-Tenant-ID` (Required), `Authorization` (Bearer token required)
-  - **Params**: `query`, `stream` (bool)
+  - **Params**: `query`, `conversation_id`, `stream` (bool)
   - **Response**: NDJSON stream containing `content`, `references`, and `source_material`.
+
+### Conversations
+- `GET /api/v1/conversations/`: List all conversations for the tenant.
+- `GET /api/v1/conversations/{id}/history`: Get the full message history for a conversation.
+- `DELETE /api/v1/conversations/{id}`: Delete a conversation and its messages.
 
 ### Security (API Gateway)
 - **ForwardAuth**: `GET /api/v1/auth/verify`. Traefik delegates auth to this endpoint.
