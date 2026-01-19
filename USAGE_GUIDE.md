@@ -108,7 +108,22 @@ When enabled, the system logs the (Query, Context, Answer) triplet to an evaluat
 
 ---
 
-## 5. Troubleshooting
+## 6. High-Scale Operations
+
+The system is optimized to handle 1M+ queries and 1M+ ingestions per day.
+
+### Horizontal Scaling
+- **API Nodes**: Scale the `api` service to handle multiple parallel requests. Traefik automatically load balances across instances.
+- **Worker Replicas**: The `worker` service is configured with 4 default replicas in `docker-compose.yml`, each with a concurrency of 16 (64 parallel tasks). Scale this based on your ingestion queue depth.
+
+### Connection Pooling
+- **Database**: Optimized SQLAlchemy pool size (50) and max overflow (100) allow for handling massive concurrent DB sessions without overhead.
+- **Redis**: High-capacity broker pool limits ensure worker-to-queue communication remains stable under load.
+
+### Resource Management
+Docker resource limits are set to ensure the system remains stable:
+- **API**: 2 CPU / 4GB RAM
+- **Worker**: 4 CPU / 8GB RAM per replica
 
 - **Check Logs**:
   ```bash
