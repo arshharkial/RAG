@@ -22,15 +22,30 @@ def process_ingestion_job(self, job_id: str, tenant_id: str, media_type: str, fi
     loop = asyncio.get_event_loop()
     loop.run_until_complete(update_job_status(job_id, JobStatus.PROCESSING))
     
+    local_temp_path = None
     try:
+        # 2. Check if file_path is a URL and download if necessary
+        if file_path.startswith("http"):
+            import requests
+            import tempfile
+            logger.info(f"Downloading remote file from {file_path}")
+            temp_file = tempfile.NamedTemporaryFile(delete=False)
+            response = requests.get(file_path)
+            temp_file.write(response.content)
+            temp_file.close()
+            local_temp_path = temp_file.name
+            working_path = local_temp_path
+        else:
+            working_path = file_path
+
         if media_type == MediaType.TEXT:
-            process_text_job(job_id, tenant_id, file_path)
+            process_text_job(job_id, tenant_id, working_path)
         elif media_type == MediaType.AUDIO:
-            process_audio_job(job_id, tenant_id, file_path)
+            process_audio_job(job_id, tenant_id, working_path)
         elif media_type == MediaType.IMAGE:
-            process_image_job(job_id, tenant_id, file_path)
+            process_image_job(job_id, tenant_id, working_path)
         elif media_type == MediaType.VIDEO:
-            process_video_job(job_id, tenant_id, file_path)
+            process_video_job(job_id, tenant_id, working_path)
         
         loop.run_until_complete(update_job_status(job_id, JobStatus.COMPLETED))
         logger.info(f"Job {job_id} completed successfully")
@@ -39,6 +54,10 @@ def process_ingestion_job(self, job_id: str, tenant_id: str, media_type: str, fi
         logger.error(f"Job {job_id} failed: {str(e)}")
         loop.run_until_complete(update_job_status(job_id, JobStatus.FAILED, error_message=str(e)))
         raise self.retry(exc=e, countdown=60, max_retries=3)
+    finally:
+        # Cleanup temp file if created
+        if local_temp_path and os.path.exists(local_temp_path):
+            os.remove(local_temp_path)
 
 async def update_job_status(job_id: str, status: JobStatus, error_message: str = None):
     async with AsyncSessionLocal() as session:

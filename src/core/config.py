@@ -24,6 +24,14 @@ class Settings(BaseSettings):
     LLM_PROVIDER: str = "mock"
     EMBEDDING_PROVIDER: str = "mock"
 
+    # AWS & S3 (Optional, defaults to local)
+    AWS_ACCESS_KEY_ID: Optional[str] = None
+    AWS_SECRET_ACCESS_KEY: Optional[str] = None
+    AWS_REGION: str = "us-east-1"
+    S3_BUCKET_NAME: Optional[str] = None
+    CLOUDFRONT_DOMAIN: Optional[str] = None
+    STORAGE_TYPE: str = "local"  # "local" or "s3"
+
     # Security
     SECRET_KEY: str = "secret"
     ALGORITHM: str = "HS256"

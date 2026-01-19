@@ -10,3 +10,4 @@ All significant updates to the system architecture and implementation are tracke
 | 2026-01-19 | V1.3 | Added Citations and Source Material Attribution to API response. | Antigravity |
 | 2026-01-19 | V1.4 | Completed full implementation: Ingestion, Retrieval, Hotswappable Layer, and Compliance. | Antigravity |
 | 2026-01-19 | V1.5 | Optimized Dockerfile with a multi-stage build process. | Antigravity |
+| 2026-01-19 | V1.6 | Integrated AWS S3 for storage and CloudFront for content delivery. | Antigravity |
