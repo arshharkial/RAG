@@ -16,6 +16,14 @@ class Settings(BaseSettings):
     # Qdrant
     QDRANT_URL: str = "http://qdrant:6333"
 
+    # API Keys
+    OPENAI_API_KEY: str = "sk-..."
+    ANTHROPIC_API_KEY: str = "sk-..."
+
+    # Providers
+    LLM_PROVIDER: str = "mock"
+    EMBEDDING_PROVIDER: str = "mock"
+
     # Security
     SECRET_KEY: str = "secret"
     ALGORITHM: str = "HS256"
