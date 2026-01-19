@@ -59,10 +59,14 @@ def process_text_job(job_id, tenant_id, file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
     
-    # Simple semantic chunking with overlap
-    chunks = chunk_text(text, chunk_size=500, overlap=50)
+    # PII Scrubbing
+    from src.services.pii_scrubber import pii_scrubber
+    scrubbed_text = pii_scrubber.scrub_text(text)
     
-    logger.info(f"Chunked text into {len(chunks)} fragments")
+    # Simple semantic chunking with overlap
+    chunks = chunk_text(scrubbed_text, chunk_size=500, overlap=50)
+    
+    logger.info(f"Chunked scrubbed text into {len(chunks)} fragments")
     return chunks
 
 def process_audio_job(job_id, tenant_id, file_path):

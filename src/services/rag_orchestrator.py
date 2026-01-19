@@ -20,24 +20,27 @@ class RAGOrchestrator:
         query_vector = await self.embedder.embed_text(query_text)
         query_hash = hashlib.sha256(query_text.encode()).hexdigest()
         
-        # 2. Check semantic cache (simplified)
+        # 2. Audit Log - Query Start
+        from src.services.audit_logger import audit_logger
+        await audit_logger.log(tenant_id, action="retrieval_query", payload={"query": query_text})
+
+        # 3. Check semantic cache
         cached_response = await semantic_cache.get(tenant_id, query_hash)
         if cached_response:
             yield {"type": "cache_hit", "content": cached_response}
             return
 
-        # 3. Retrieve context from Vector DB
+        # 4. Retrieve context
         hits = await vector_store.search(tenant_id, query_vector, limit=20)
         
-        # 4. Rerank
+        # 5. Rerank
         documents = [hit["payload"] for hit in hits]
-        # In a real setup, we'd pass chunk text and query to reranker
         reranked_docs = await reranker.rerank(query_text, documents, top_k=5)
         
-        # 5. Construct Context for LLM
+        # 6. Construct Context
         context_str = self._format_context(reranked_docs)
         
-        # 6. Generate Response with Citations
+        # 7. Generate Response
         system_prompt = (
             "You are a helpful assistant. Use the provided context to answer the query. "
             "Use inline citations in the format [1], [2], etc. "
@@ -46,13 +49,15 @@ class RAGOrchestrator:
         
         prompt = f"Context:\n{context_str}\n\nQuery: {query_text}"
         
-        # 7. Stream Response
         full_answer = ""
         async for chunk in self.llm.generate_stream(prompt, system_prompt=system_prompt):
             full_answer += chunk
             yield {"type": "content", "chunk": chunk}
             
-        # 8. Send References and Source Material
+        # 8. Shadow Evaluation (Togglable)
+        await self._handle_evaluation(tenant_id, query_text, reranked_docs, full_answer)
+
+        # 9. Send References
         references = self._get_references(reranked_docs)
         yield {"type": "references", "content": references}
         
@@ -61,6 +66,34 @@ class RAGOrchestrator:
         
         # 9. Cache the (non-streaming) result if needed
         # await semantic_cache.set(tenant_id, query_hash, {"answer": full_answer})
+
+    async def _handle_evaluation(
+        self, 
+        tenant_id: str, 
+        query: str, 
+        contexts: List[Dict[str, Any]], 
+        answer: str
+    ):
+        """
+        Togglable evaluation pipeline.
+        """
+        from src.services.cache import semantic_cache
+        # Check Redis for a feature flag: eval:tenant_id
+        is_eval_on = await semantic_cache.redis.get(f"eval:{tenant_id}")
+        
+        if is_eval_on == "true":
+            # 1. Shadow Log for Evaluation
+            await audit_logger.log(
+                tenant_id, 
+                action="evaluation_shadow_log", 
+                payload={
+                    "query": query,
+                    "answer": answer,
+                    "contexts": [c.get("text") for c in contexts]
+                }
+            )
+            # In production, this would trigger an async RAGAS/G-Eval job
+            logger.info(f"Triggered background accuracy evaluation for tenant {tenant_id}")
 
     def _format_context(self, docs: List[Dict[str, Any]]) -> str:
         context_parts = []
