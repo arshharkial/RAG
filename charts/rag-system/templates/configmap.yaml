@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rag-system.fullname" . }}-config
+data:
+  DATABASE_URL: "postgresql+asyncpg://{{ .Values.env.dbUser }}:{{ .Values.secrets.dbPassword }}@{{ .Values.env.dbHost }}:5432/{{ .Values.env.dbName }}"
+  REDIS_URL: {{ .Values.env.redisUrl | quote }}
+  CELERY_BROKER_URL: {{ .Values.env.redisUrl | quote }}
+  CELERY_RESULT_BACKEND: {{ .Values.env.redisUrl | quote }}
+  QDRANT_URL: {{ .Values.env.qdrantUrl | quote }}
+  STORAGE_TYPE: {{ .Values.env.storageType | quote }}
+  AWS_REGION: {{ .Values.env.awsRegion | quote }}
+  CLOUDFRONT_DOMAIN: {{ .Values.env.cloudfrontDomain | quote }}
+  S3_BUCKET_NAME: {{ .Values.env.s3BucketName | quote }}
+  LLM_PROVIDER: {{ .Values.env.llmProvider | quote }}
+  EMBEDDING_PROVIDER: {{ .Values.env.embeddingProvider | quote }}
+  ADMIN_USERNAME: {{ .Values.secrets.adminUsername | quote }}

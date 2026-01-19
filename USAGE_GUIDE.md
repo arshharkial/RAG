@@ -120,10 +120,23 @@ The system is optimized to handle 1M+ queries and 1M+ ingestions per day.
 - **Database**: Optimized SQLAlchemy pool size (50) and max overflow (100) allow for handling massive concurrent DB sessions without overhead.
 - **Redis**: High-capacity broker pool limits ensure worker-to-queue communication remains stable under load.
 
-### Resource Management
-Docker resource limits are set to ensure the system remains stable:
-- **API**: 2 CPU / 4GB RAM
-- **Worker**: 4 CPU / 8GB RAM per replica
+---
+
+## 7. Kubernetes Deployment (Helm)
+
+For production environments, use the provided Helm chart located in `charts/rag-system`.
+
+### Deployment Steps
+1. **Configure Values**: Edit `charts/rag-system/values.yaml` with your production settings (API keys, DB host, etc.).
+2. **Install**:
+   ```bash
+   helm install rag-prod ./charts/rag-system -f my-values.yaml
+   ```
+
+### High-Availability Features
+- **Auto-scaling**: The chart includes HPAs that scale the API and Worker pods based on CPU utilization.
+- **Ingress**: Configured for `nginx` ingress controller with automated SSL via `cert-manager`.
+- **Resource Management**: Default limits ensure high-throughput stability (1M+ queries/day).
 
 - **Check Logs**:
   ```bash

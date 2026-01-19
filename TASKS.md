@@ -78,3 +78,10 @@ Tracking the implementation progress of the Multi-Modal RAG system.
 - [x] Tuned Traefik for 1000+ RPS burst
 - [x] Implemented Redis broker connection pooling
 - [x] Infrastructure resource constraints and concurrency tuning
+
+### Phase 12: Production Helm Chart
+- [x] Created Production-ready Helm chart
+- [x] Implemented API & Worker Deployments
+- [x] Configured Horizontal Pod Autoscalers (HPA)
+- [x] Set up Ingress with SSL & cert-manager support
+- [x] Externalized ConfigMaps & Secrets

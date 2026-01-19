@@ -15,3 +15,4 @@ All significant updates to the system architecture and implementation are tracke
 | 2026-01-19 | V1.8 | Created comprehensive USAGE_GUIDE.md for end-users. | Antigravity |
 | 2026-01-19 | V1.9 | Implemented Admin onboarding endpoints with HTTP Basic Auth. | Antigravity |
 | 2026-01-19 | V1.10 | Optimized for high-throughput scaling (1M+ queries/ingestions per day). | Antigravity |
+| 2026-01-19 | V1.11 | Generated production Helm chart for Kubernetes deployment. | Antigravity |

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rag-system.fullname" . }}-worker
+  labels:
+    app: {{ include "rag-system.name" . }}-worker
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "rag-system.name" . }}-worker
+  template:
+    metadata:
+      labels:
+        app: {{ include "rag-system.name" . }}-worker
+    spec:
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["celery", "-A", "src.worker.main", "worker", "--loglevel=info", "--concurrency={{ .Values.worker.concurrency }}"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "rag-system.fullname" . }}-config
+            - secretRef:
+                name: {{ include "rag-system.fullname" . }}-secrets
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}

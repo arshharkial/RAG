@@ -1,0 +1,6 @@
+apiVersion: v2
+name: rag-system
+description: A Helm chart for a production-grade Multi-Modal RAG system
+type: application
+version: 1.0.0
+appVersion: "1.10.0"
